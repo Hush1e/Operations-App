@@ -5,6 +5,8 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Relative base so the build works at https://hush1e.github.io/Operations-App/
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
