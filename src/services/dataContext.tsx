@@ -32,6 +32,7 @@ import {
   initAuth,
   googleSignIn,
   getAccessToken,
+  clearAccessToken,
   logout as authLogout,
 } from './authService';
 import {
@@ -39,6 +40,7 @@ import {
   ID_PREFIXES,
   generateId,
   extractSpreadsheetId,
+  explainSheetError,
   fetchSpreadsheetMetadata,
   batchFetchAllSheets,
   createNewSpreadsheet,
@@ -88,6 +90,7 @@ interface DataContextType {
   spreadsheetId: string | null;
   spreadsheetTitle: string;
   isLiveConnected: boolean;
+  syncError: string | null;
   isSyncing: boolean;
   lastSyncTime: Date | null;
   activeProgramId: string;
@@ -167,6 +170,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(() => localStorage.getItem(STORAGE_SHEET_KEY));
   const [spreadsheetTitle, setSpreadsheetTitle] = useState<string>('Local Demo Workspace');
   const [isLiveConnected, setIsLiveConnected] = useState<boolean>(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [activeProgramId, setActiveProgramIdState] = useState<string>(() => localStorage.getItem(STORAGE_PROGRAM_KEY) || 'PRG-CYBER');
@@ -200,8 +204,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem(STORAGE_PROGRAM_KEY, id);
   };
 
-  const loadDataFromSpreadsheet = useCallback(async (sheetId: string, token: string) => {
+  const loadDataFromSpreadsheet = useCallback(async (sheetId: string, token: string, throwOnError = false) => {
     setIsSyncing(true);
+    setSyncError(null);
     try {
       const meta = await fetchSpreadsheetMetadata(sheetId, token);
       setSpreadsheetTitle(meta.title);
@@ -238,7 +243,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLastSyncTime(new Date());
     } catch (err) {
       console.warn('Could not read from Google Sheet:', err);
+      const friendly = explainSheetError(err);
+      if (/\(401\)|UNAUTHENTICATED/i.test(err instanceof Error ? err.message : '')) {
+        clearAccessToken();
+      }
+      setSyncError(friendly);
       setIsLiveConnected(false);
+      if (throwOnError) throw new Error(friendly);
     } finally {
       setIsSyncing(false);
     }
@@ -288,7 +299,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setIsSyncing(true);
     try {
-      await loadDataFromSpreadsheet(cleanId, token);
+      await loadDataFromSpreadsheet(cleanId, token, true);
       setSpreadsheetId(cleanId);
       localStorage.setItem(STORAGE_SHEET_KEY, cleanId);
     } finally {
@@ -320,7 +331,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshFromSheet = async () => {
     if (!spreadsheetId) return;
     const token = await getAccessToken();
-    if (!token) throw new Error('Sign in required.');
+    if (!token) {
+      setSyncError('Your Google sign-in has expired. Click "Connect Google" again.');
+      setIsLiveConnected(false);
+      return;
+    }
     await loadDataFromSpreadsheet(spreadsheetId, token);
   };
 
@@ -933,6 +948,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         spreadsheetId,
         spreadsheetTitle,
         isLiveConnected,
+        syncError,
         isSyncing,
         lastSyncTime,
         activeProgramId,

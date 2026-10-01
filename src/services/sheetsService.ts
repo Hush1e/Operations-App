@@ -145,7 +145,8 @@ export async function batchFetchAllSheets(
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to batch fetch sheets: ${res.statusText}`);
+    const errorBody = await res.text();
+    throw new Error(`Failed to read Google Sheet tabs (${res.status}): ${errorBody}`);
   }
 
   const result = await res.json();
@@ -429,4 +430,28 @@ export function recordsToCSV(records: Record<string, any>[]): string {
   });
 
   return rows.join('\n');
+}
+
+
+/**
+ * Turn a raw Google API error into a plain-language explanation of what to do.
+ */
+export function explainSheetError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/not supported for this document/i.test(msg)) {
+    return 'This file is still an Excel (.xlsx) file. Open it in Google Sheets, choose File > Save as Google Sheets, then connect the new link.';
+  }
+  if (/SERVICE_DISABLED|has not been used in project|is disabled/i.test(msg)) {
+    return 'The Google Sheets API is not turned on for this app\'s Google Cloud project. Enable "Google Sheets API" (and "Google Drive API") in Google Cloud Console, wait a minute, then try again.';
+  }
+  if (/\(401\)|UNAUTHENTICATED|invalid authentication/i.test(msg)) {
+    return 'Your Google sign-in has expired. Click "Connect Google" again, then retry.';
+  }
+  if (/\(403\)|PERMISSION_DENIED/i.test(msg)) {
+    return 'Google refused access to this sheet. Make sure you signed in with the account that owns the sheet, and that you allowed Google Sheets access when signing in.';
+  }
+  if (/\(404\)|NOT_FOUND|Requested entity was not found/i.test(msg)) {
+    return 'That sheet could not be found. Check the link, and make sure it is a Google Sheet (not an .xlsx file in Drive).';
+  }
+  return msg;
 }
