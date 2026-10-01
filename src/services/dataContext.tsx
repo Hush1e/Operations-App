@@ -215,28 +215,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (tabNamesToFetch.length > 0) {
         const rawData = await batchFetchAllSheets(sheetId, token, tabNamesToFetch);
 
-        if (rawData.PROGRAMS?.length) setPrograms(rawData.PROGRAMS as ProgramRecord[]);
-        if (rawData.TERMS?.length) setTerms(rawData.TERMS as TermRecord[]);
-        if (rawData.COURSES?.length) setCourses(rawData.COURSES as CourseRecord[]);
-        if (rawData.INSTRUCTOR_ROSTER?.length) setInstructors(rawData.INSTRUCTOR_ROSTER as InstructorRecord[]);
-        if (rawData.COURSE_ASSIGNMENTS?.length) setAssignments(rawData.COURSE_ASSIGNMENTS as CourseAssignmentRecord[]);
-        if (rawData.ASSIGNMENT_COMPONENTS?.length) setComponents(rawData.ASSIGNMENT_COMPONENTS as AssignmentComponentRecord[]);
-        if (rawData.TASKS?.length) setTasks(rawData.TASKS as TaskRecord[]);
-        if (rawData.TASK_TEMPLATES?.length) setTaskTemplates(rawData.TASK_TEMPLATES as TaskTemplateRecord[]);
-        if (rawData.RECURRING_TASK_RULES?.length) setRecurringRules(rawData.RECURRING_TASK_RULES as RecurringTaskRuleRecord[]);
-        if (rawData.PLOS?.length) setPlos(rawData.PLOS as PloRecord[]);
-        if (rawData.COURSE_CLOS?.length) setClos(rawData.COURSE_CLOS as CloRecord[]);
-        if (rawData.COURSE_PLO_MAP?.length) setCoursePloMaps(rawData.COURSE_PLO_MAP as CoursePloMapRecord[]);
-        if (rawData.CLO_ASSESSMENT_MAP?.length) setCloAssessmentMaps(rawData.CLO_ASSESSMENT_MAP as CloAssessmentMapRecord[]);
-        if (rawData.COURSE_ACTIVITIES?.length) setActivities(rawData.COURSE_ACTIVITIES as CourseActivityRecord[]);
-        if (rawData.ASSESSMENTS?.length) setAssessments(rawData.ASSESSMENTS as AssessmentRecord[]);
-        if (rawData.CONTINUOUS_IMPROVEMENT?.length) setImprovements(rawData.CONTINUOUS_IMPROVEMENT as ContinuousImprovementRecord[]);
-        if (rawData.ACCREDITATION_BODIES?.length) setBodies(rawData.ACCREDITATION_BODIES as AccreditationBodyRecord[]);
-        if (rawData.ACCREDITATION_EVIDENCE?.length) setAccreditationEvidence(rawData.ACCREDITATION_EVIDENCE as AccreditationEvidenceRecord[]);
-        if (rawData.CREDENTIALS?.length) setCredentials(rawData.CREDENTIALS as CredentialRecord[]);
-        if (rawData.ACADEMIC_CALENDAR?.length) setCalendarEvents(rawData.ACADEMIC_CALENDAR as CalendarEventRecord[]);
-        if (rawData.ADVISEES?.length) setAdvisees(rawData.ADVISEES as AdviseeRecord[]);
-        if (rawData.PROGRAM_FEATURES?.length) setFeatures(rawData.PROGRAM_FEATURES as ProgramFeatureRecord[]);
+        if (rawData.PROGRAMS) setPrograms(rawData.PROGRAMS as ProgramRecord[]);
+        if (rawData.TERMS) setTerms(rawData.TERMS as TermRecord[]);
+        if (rawData.COURSES) setCourses(rawData.COURSES as CourseRecord[]);
+        if (rawData.INSTRUCTOR_ROSTER) setInstructors(rawData.INSTRUCTOR_ROSTER as InstructorRecord[]);
+        if (rawData.COURSE_ASSIGNMENTS) setAssignments(rawData.COURSE_ASSIGNMENTS as CourseAssignmentRecord[]);
+        if (rawData.ASSIGNMENT_COMPONENTS) setComponents(rawData.ASSIGNMENT_COMPONENTS as AssignmentComponentRecord[]);
+        if (rawData.TASKS) setTasks(rawData.TASKS as TaskRecord[]);
+        if (rawData.TASK_TEMPLATES) setTaskTemplates(rawData.TASK_TEMPLATES as TaskTemplateRecord[]);
+        if (rawData.RECURRING_TASK_RULES) setRecurringRules(rawData.RECURRING_TASK_RULES as RecurringTaskRuleRecord[]);
+        if (rawData.PLOS) setPlos(rawData.PLOS as PloRecord[]);
+        if (rawData.COURSE_CLOS) setClos(rawData.COURSE_CLOS as CloRecord[]);
+        if (rawData.COURSE_PLO_MAP) setCoursePloMaps(rawData.COURSE_PLO_MAP as CoursePloMapRecord[]);
+        if (rawData.CLO_ASSESSMENT_MAP) setCloAssessmentMaps(rawData.CLO_ASSESSMENT_MAP as CloAssessmentMapRecord[]);
+        if (rawData.COURSE_ACTIVITIES) setActivities(rawData.COURSE_ACTIVITIES as CourseActivityRecord[]);
+        if (rawData.ASSESSMENTS) setAssessments(rawData.ASSESSMENTS as AssessmentRecord[]);
+        if (rawData.CONTINUOUS_IMPROVEMENT) setImprovements(rawData.CONTINUOUS_IMPROVEMENT as ContinuousImprovementRecord[]);
+        if (rawData.ACCREDITATION_BODIES) setBodies(rawData.ACCREDITATION_BODIES as AccreditationBodyRecord[]);
+        if (rawData.ACCREDITATION_EVIDENCE) setAccreditationEvidence(rawData.ACCREDITATION_EVIDENCE as AccreditationEvidenceRecord[]);
+        if (rawData.CREDENTIALS) setCredentials(rawData.CREDENTIALS as CredentialRecord[]);
+        if (rawData.ACADEMIC_CALENDAR) setCalendarEvents(rawData.ACADEMIC_CALENDAR as CalendarEventRecord[]);
+        if (rawData.ADVISEES) setAdvisees(rawData.ADVISEES as AdviseeRecord[]);
+        if (rawData.PROGRAM_FEATURES) setFeatures(rawData.PROGRAM_FEATURES as ProgramFeatureRecord[]);
       }
 
       setIsLiveConnected(true);
