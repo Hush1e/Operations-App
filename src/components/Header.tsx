@@ -40,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
     spreadsheetId,
     spreadsheetTitle,
     isLiveConnected,
+    syncError,
     isSyncing,
     lastSyncTime,
     refreshFromSheet,
@@ -127,11 +128,11 @@ export const Header: React.FC<HeaderProps> = ({
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
                 : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
             }`}
-            title="Click to view or connect Google Sheet"
+            title={syncError || 'Click to view or connect Google Sheet'}
           >
             <Database className="w-3.5 h-3.5" />
             <span className="hidden md:inline max-w-[130px] truncate">
-              {isLiveConnected ? spreadsheetTitle : 'Local / Demo Mode'}
+              {isLiveConnected ? spreadsheetTitle : syncError ? 'Sheet not loading' : 'Local / Demo Mode'}
             </span>
             <span className="md:hidden">{isLiveConnected ? 'Connected' : 'Demo'}</span>
             <span

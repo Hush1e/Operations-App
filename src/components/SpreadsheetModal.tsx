@@ -22,6 +22,7 @@ export const SpreadsheetModal: React.FC<SpreadsheetModalProps> = ({ isOpen, onCl
     spreadsheetId,
     spreadsheetTitle,
     isLiveConnected,
+    syncError,
     connectExistingSheet,
     createNewSpreadsheetDatabase,
     disconnectSheet,
@@ -174,6 +175,12 @@ export const SpreadsheetModal: React.FC<SpreadsheetModalProps> = ({ isOpen, onCl
               <span>1-Click Create Academic Database Sheet in Drive</span>
             </button>
           </div>
+
+          {syncError && !statusMessage && (
+            <div className="p-3 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
+              {syncError}
+            </div>
+          )}
 
           {statusMessage && (
             <div
