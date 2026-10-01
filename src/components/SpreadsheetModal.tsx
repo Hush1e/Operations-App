@@ -26,6 +26,7 @@ export const SpreadsheetModal: React.FC<SpreadsheetModalProps> = ({ isOpen, onCl
     connectExistingSheet,
     createNewSpreadsheetDatabase,
     disconnectSheet,
+    loadHockingProgramData,
     refreshFromSheet,
     user,
     signIn,
@@ -52,6 +53,25 @@ export const SpreadsheetModal: React.FC<SpreadsheetModalProps> = ({ isOpen, onCl
       }, 1000);
     } catch (err: any) {
       setStatusMessage(`Connection failed: ${err.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleLoadProgramData = async () => {
+    const ok = window.confirm(
+      'Load the Hocking program data into the connected sheet?\n\n' +
+        'This replaces the program tabs (courses, outcomes, calendar, tasks, credentials, and so on). ' +
+        'Advisee and advising-note tabs are not touched.'
+    );
+    if (!ok) return;
+    setIsProcessing(true);
+    setStatusMessage('Loading program data into your sheet...');
+    try {
+      await loadHockingProgramData();
+      setStatusMessage('Program data loaded.');
+    } catch (err: any) {
+      setStatusMessage(`Load failed: ${err.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -131,6 +151,22 @@ export const SpreadsheetModal: React.FC<SpreadsheetModalProps> = ({ isOpen, onCl
               </a>
             )}
           </div>
+
+          {isLiveConnected && (
+            <div className="space-y-2">
+              <button
+                onClick={handleLoadProgramData}
+                disabled={isProcessing}
+                className="w-full px-3 py-2.5 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-semibold disabled:opacity-50"
+              >
+                Load Hocking program data into this sheet
+              </button>
+              <p className="text-[11px] text-slate-500">
+                Fills courses, CLOs, assignments, outcome maps, calendar, tasks, credentials, and accreditation records
+                from your course builds. Advising tabs are never changed.
+              </p>
+            </div>
+          )}
 
           {/* Option 1: Connect Existing Sheet */}
           <div className="space-y-2 pt-2 border-t border-slate-100">

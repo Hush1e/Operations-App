@@ -41,6 +41,7 @@ import {
   generateId,
   extractSpreadsheetId,
   explainSheetError,
+  replaceTabs,
   fetchSpreadsheetMetadata,
   batchFetchAllSheets,
   createNewSpreadsheet,
@@ -131,6 +132,7 @@ interface DataContextType {
   recurringTasks: RecurringTaskRuleRecord[];
   disconnectSheet: () => void;
   connectExistingSheet: (idOrUrl: string) => Promise<void>;
+  loadHockingProgramData: () => Promise<void>;
   createNewSpreadsheetDatabase: (title: string) => Promise<string>;
   prepareCoursesForTerm: (params: { termId: string; partOfTerm?: string; startDate?: string; taskTitles?: string[] }) => Promise<{ created: number; coursesCount: number }>;
 
@@ -337,6 +339,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
     await loadDataFromSpreadsheet(spreadsheetId, token);
+  };
+
+  // Writes the Hocking program dataset (public/hocking-seed.json) into the connected sheet.
+  // Advising tabs are never touched.
+  const loadHockingProgramData = async () => {
+    if (!spreadsheetId) throw new Error('Connect a Google Sheet first.');
+    const token = await getAccessToken();
+    if (!token) throw new Error('Your Google sign-in has expired. Click "Connect Google" again.');
+    setIsSyncing(true);
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}hocking-seed.json`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Could not load the program data file (${res.status}).`);
+      const seed = await res.json();
+      await replaceTabs(spreadsheetId, token, seed.tabs || {});
+    } catch (err) {
+      throw new Error(explainSheetError(err));
+    } finally {
+      setIsSyncing(false);
+    }
+    await loadDataFromSpreadsheet(spreadsheetId, token, true);
   };
 
   const disconnectSpreadsheet = () => {
@@ -988,6 +1010,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         recurringTasks: recurringRules,
         disconnectSheet: disconnectSpreadsheet,
         connectExistingSheet: connectSpreadsheet,
+        loadHockingProgramData,
         createNewSpreadsheetDatabase: createAndConnectSpreadsheet,
         prepareCoursesForTerm: async ({ termId }: { termId: string; partOfTerm?: string; startDate?: string; taskTitles?: string[] }) => {
           const res = await generateSemesterStartTasks(termId);

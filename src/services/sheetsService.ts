@@ -455,3 +455,54 @@ export function explainSheetError(err: unknown): string {
   }
   return msg;
 }
+
+/**
+ * Replace the contents of the given tabs in an existing spreadsheet.
+ * Tabs that do not exist yet are created. Tabs not listed in `tabs` are left untouched
+ * (advising tabs are never written by this function).
+ */
+export async function replaceTabs(
+  spreadsheetId: string,
+  accessToken: string,
+  tabs: Record<string, Record<string, any>[]>
+): Promise<void> {
+  const PROTECTED = new Set(['ADVISEES', 'ADVISING_NOTES']);
+  const names = Object.keys(tabs).filter(n => SCHEMAS[n] && !PROTECTED.has(n));
+  if (!names.length) return;
+
+  const auth = { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+  const meta = await fetchSpreadsheetMetadata(spreadsheetId, accessToken);
+  const missing = names.filter(n => !meta.tabs.includes(n));
+  if (missing.length) {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+      method: 'POST',
+      headers: auth,
+      body: JSON.stringify({
+        requests: missing.map(title => ({
+          addSheet: { properties: { title, gridProperties: { frozenRowCount: 1 } } },
+        })),
+      }),
+    });
+    if (!res.ok) throw new Error(`Failed to add tabs (${res.status}): ${await res.text()}`);
+  }
+
+  const clear = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchClear`, {
+    method: 'POST',
+    headers: auth,
+    body: JSON.stringify({ ranges: names.map(n => `${n}!A:Z`) }),
+  });
+  if (!clear.ok) throw new Error(`Failed to clear tabs (${clear.status}): ${await clear.text()}`);
+
+  const data = names.map(n => {
+    const headers = SCHEMAS[n];
+    const values: any[][] = [headers];
+    tabs[n].forEach(r => values.push(headers.map(h => (r[h] !== undefined && r[h] !== null ? r[h] : ''))));
+    return { range: `${n}!A1`, values };
+  });
+  const write = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
+    method: 'POST',
+    headers: auth,
+    body: JSON.stringify({ valueInputOption: 'RAW', data }),
+  });
+  if (!write.ok) throw new Error(`Failed to write tabs (${write.status}): ${await write.text()}`);
+}
