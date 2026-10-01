@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* Hocking College theme: the app's indigo accent is remapped to Hocking green. */
+@theme {
+  --color-indigo-50: #eaf4ef;
+  --color-indigo-100: #cfe6da;
+  --color-indigo-200: #a3cfb8;
+  --color-indigo-300: #6fb292;
+  --color-indigo-400: #3f9170;
+  --color-indigo-500: #1f7556;
+  --color-indigo-600: #0f6146;
+  --color-indigo-700: #0b4f3a;
+  --color-indigo-800: #08402f;
+  --color-indigo-900: #063224;
+  --color-indigo-950: #031c14;
+  --color-gold-400: #e0b84a;
+  --color-gold-500: #c99a2e;
+  --color-gold-600: #a67c1f;
+}
